@@ -7,8 +7,7 @@
 
 # This will be the handler of modules and runtime executions
 # Import only the needed functions from libraries
-from os import listdir
-from os import system
+from os import listdir, system, name as os_name
 from time import sleep
 
 # Alter this to modify runtime ( i * seconds = runtime )
@@ -17,7 +16,10 @@ i = 5
 seconds = 30
 
 # Clear terminal for clean output
-system("cls")
+if os_name == "nt":
+    system("cls")
+else:
+    system("clear")
 
 # Run until runtime comes to end
 while i != 0:
@@ -40,6 +42,31 @@ while i != 0:
         i -= 1
         continue
 
+    # Read first line of each module, should be commented function call to be executed
+    line = ""
+    lines = []
+    rm_module = []
+    # Loop through modules
+    for module in modules:
+        try:
+            # Open module and read the first line removing any leading and trailing spaces, # and \n
+            file = open("modules/" + module, "r")
+            line = file.readline().strip('# \n')
+            # If the read line does not start with "exec", mark module to be removed
+            if line.startswith("exec") == False:
+                rm_module.append(module)
+            # Otherwise, add line to lines list
+            else:
+                lines.append(line)
+            file.close
+        except IOError:
+            # File read failed, print error msg, wait and try again
+            print("Error: Couldn't read the file")
+            sleep(seconds)
+            continue
+    # Remove invalid modules from modules list
+    modules = [j for j in modules if j not in rm_module]
+    
     # Remove .py ending from files
     for module in range(0, len(modules)):
         modules[module] = modules[module][:-3]
@@ -49,10 +76,13 @@ while i != 0:
         file = open("runtime.py","w")
         file.write("# This file run all the modules in modules-directory.\n")
         file.write("# This file will be rewritten periodically, do not make changes here.\n")
+        # Write the code to create function runlist
         file.write("def runlist():\n")
-        for module in modules:
-            file.write(f"\tfrom modules import {module}\n")
-            file.write(f"\t{module}.execute()\n")
+        # Loop through modules and lines lists and write correct imports and function calls
+        for j in range(0, len(modules)):
+            file.write(f"\tfrom modules import {modules[j]}\n")
+            file.write(f"\t{modules[j]}.{lines[j]}\n")
+        # Write the command to execute runlist function
         file.write("\nrunlist()")
         file.close()
     except IOError:
@@ -61,8 +91,11 @@ while i != 0:
         sleep(seconds)
         continue
 
-    # Run this newly created runtime.py    
-    system("py runtime.py")
+    # Run this newly created runtime.py, this might need to be altered depending on os    
+    if os_name == "nt":
+        system("py runtime.py")
+    else:
+        system("python3 runtime.py")
 
     # Decrease iteration and wait before doing this again
     i -= 1

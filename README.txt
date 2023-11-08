@@ -1,6 +1,12 @@
 This is a proof of concept on how to create a Python script, which will allow modules to be added or removed 
 while the code is being run.
 
+Modules need to have a function that starts with word exec, which will be written and called in the runtime.py.
+First line of each module needs to be commented function call, ie:
+# execute()
+or 
+# exec(arg, arg)
+
 It requires following files and directories:
 
 MAIN-DIRECTORY:
@@ -32,10 +38,6 @@ modules_2.py
     This is an example of a module, that can be removed from modules-directory while the start.py program is
     running.
 
-----
 
-Note about modules:
-    Modules need to have a function called execute(), which is will be called in the runtime.py. At this 
-    time, execute() will not allow for any parameters.
-
+Created with Python 3.12.0
  
